@@ -1,0 +1,17 @@
+# Секреты
+.env
+files/
+
+# Виртуальные окружения
+.venv/
+venv/
+
+# PyCharm
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
