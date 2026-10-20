@@ -2,8 +2,7 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from app.config import BOT_TOKEN
 from app.network.proxy import session
-from app.handlers.command import callback_start, callback_skills, \
-    unknown, callback_back, state, start, help
+from app.handlers.command import callback_start, callback_skills, unknown, callback_back, state, start, help
 from app.handlers.document import document
 
 async def main():
