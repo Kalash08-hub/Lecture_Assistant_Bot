@@ -1,0 +1,24 @@
+name: Tests
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      AI_ENABLED: 'false'
+      SUPPORT_ENABLED: 'false'
+      BOT_TOKEN: '123456:TEST_TOKEN'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: python -m pip install -r requirements.txt
+      - run: python -m pip check
+      - run: python -B -m unittest discover -s tests -v
+      - run: git diff --check
