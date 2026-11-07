@@ -4,6 +4,7 @@ from aiogram.types import Message, CallbackQuery, FSInputFile, InputMediaPhoto
 from aiogram.fsm.context import FSMContext
 from app.keyboards.inline import Inline_unknown, Inline_start, Inline_skills, Inline_in_start
 from app.states.upload import UploadState
+from app.config import PROJECT_ROOT
 
 start = Router()
 unknown = Router()
@@ -17,7 +18,7 @@ help = Router()
 @start.message(CommandStart())
 async def handle_start(message: Message):
     await message.answer_photo(
-        photo=FSInputFile("assets/bot_avatar.png"),
+        photo=FSInputFile(PROJECT_ROOT / "assets/bot_avatar.png"),
         caption="👋 Привет! Я твой учебный помощник\n\n"
                 "Я помогу превратить учебные материалы\n"
                 "в удобный конспект.\n\n"
@@ -27,7 +28,6 @@ async def handle_start(message: Message):
                 "💡 Используйте кнопки ниже для управления",
         reply_markup=Inline_start
         )
-    await message.answer()
 
 @unknown.message()
 async def unknown_command(message: Message):
@@ -49,7 +49,7 @@ async def close_unknown(callback: CallbackQuery):
 async def skills_button(callback: CallbackQuery):
     await callback.message.edit_media(
         media = InputMediaPhoto(
-            media = FSInputFile("assets/telling_bot.png"),
+            media = FSInputFile(PROJECT_ROOT / "assets/telling_bot.png"),
             caption = "👋 Привет, если ты до сих пор не знаешь,\n"
                       "что я могу для тебя сделать,\n"
                       "значит ты в правильном месте.\n\n"
@@ -71,10 +71,10 @@ async def skills_button(callback: CallbackQuery):
 
 @callback_start.callback_query(F.data == "/start")
 async def start_button(callback: CallbackQuery, state: FSMContext):
-    await state.clear()
+    await state.set_state(None)
     await callback.message.edit_media(
         media = InputMediaPhoto(
-            media=FSInputFile("assets/bot_avatar.png"),
+            media=FSInputFile(PROJECT_ROOT / "assets/bot_avatar.png"),
             caption="👋 Привет! Я твой учебный помощник\n\n"
                 "Я помогу превратить учебные материалы\n"
                 "в удобный конспект.\n\n"
@@ -95,10 +95,10 @@ async def add_file_callback(callback: CallbackQuery, state: FSMContext):
     )
     await callback.message.edit_media(
         media = InputMediaPhoto(
-            media = FSInputFile("assets/waiting.png"),
+            media = FSInputFile(PROJECT_ROOT / "assets/waiting.png"),
             caption = "Ожиданию ваш файла...\n\n"
             "Отправьте файл в этот чат\n"
-            "и я начну обрабатывать его"
+            "в формате .pdf, .docx, .odt, .txt"
         ),
     )
     await callback.message.edit_reply_markup(
@@ -107,12 +107,28 @@ async def add_file_callback(callback: CallbackQuery, state: FSMContext):
     await state.set_state(UploadState.waiting_for_file)
     await callback.answer()
 
+@state.callback_query(F.data == "/point")
+async def add_presentation_callback(callback: CallbackQuery, state: FSMContext):
+    await state.set_state(UploadState.waiting_for_presentation)
+    await state.update_data(bot_message_id=callback.message.message_id)
+    await callback.message.edit_media(
+        media=InputMediaPhoto(
+            media=FSInputFile(PROJECT_ROOT / "assets/waiting.png"),
+            caption="Ожидаю вашу презентацию...\n\n"
+                    "Отправьте презентацию в этот чат\n"
+                    "в формате .pdf, .ppt, .pptx или .odp",
+        ),
+        reply_markup=Inline_in_start,
+    )
+    await callback.answer()
+
+
 @help.callback_query(F.data == "/help")
 async def help_button(callback: CallbackQuery, state: FSMContext):
     await state.set_state(UploadState.waiting_for_feedback)
     await callback.message.edit_media(
         media = InputMediaPhoto(
-            media = FSInputFile("assets/help.png"),
+            media = FSInputFile(PROJECT_ROOT / "assets/help.png"),
             caption = "Напишите свой вопрос..."
         ),
     )
