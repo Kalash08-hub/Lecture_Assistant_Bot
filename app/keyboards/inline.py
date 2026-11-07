@@ -1,39 +1,34 @@
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-Inline_start = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [InlineKeyboardButton(text="Добавить файл", callback_data="/add_file")],
-        [InlineKeyboardButton(text="Добавить презентацию", callback_data="/point")],
-        [InlineKeyboardButton(text="Возможности бота", callback_data="/skills")],
-        [InlineKeyboardButton(text="Поддержка", callback_data="/help")]
-    ]
-)
 
-Inline_unknown = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [InlineKeyboardButton(text="Продолжить работу", callback_data="/continue")],
-        [InlineKeyboardButton(text="Помощь", callback_data="/help")]
-    ]
-)
+def keyboard(rows: list[list[tuple[str, str]]]) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=text, callback_data=data) for text, data in row] for row in rows
+    ])
 
-Inline_skills = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [InlineKeyboardButton(text="Начать работу", callback_data="/start")],
-        [InlineKeyboardButton(text="Поддержка", callback_data="/help")]
-    ]
-)
 
-Inline_in_start = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [InlineKeyboardButton(text="Назад", callback_data="/start")]
-    ]
-)
+Inline_start = keyboard([
+    [('Добавить файл', '/add_file')], [('Добавить презентацию', '/point')],
+    [('Мои лекции', 'hist:0')], [('Возможности бота', '/skills')],
+    [('Поддержка', '/help')], [('Хранение и удаление данных', 'privacy')],
+])
+Inline_unknown = Inline_start
+Inline_skills = Inline_start
+Inline_in_start = keyboard([[('Отмена', '/cancel')], [('Главное меню', '/start')]])
+Inline_processing_file = keyboard([
+    [('Конспект', '/abs')], [('Краткая выжимка', '/short')],
+    [('Тест по теме', '/test')], [('Карточки', '/card')],
+])
 
-Inline_processing_file = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [InlineKeyboardButton(text="Конспект", callback_data="/abs")],
-        [InlineKeyboardButton(text="Краткая выжимка", callback_data="/short")],
-        [InlineKeyboardButton(text="Тест по теме", callback_data="/test")],
-        [InlineKeyboardButton(text="Карточки", callback_data="/card")]
-    ]
-)
+
+def lecture_keyboard(lecture_id: int) -> InlineKeyboardMarkup:
+    return keyboard([
+        [('Конспект', f'gen:outline:{lecture_id}'), ('Краткая выжимка', f'gen:short:{lecture_id}')],
+        [('Тест по теме', f'gen:quiz:{lecture_id}'), ('Карточки', f'gen:cards:{lecture_id}')],
+        [('Сохранённые результаты', f'lec:{lecture_id}')],
+        [('Удалить лекцию', f'del:{lecture_id}'), ('Мои лекции', 'hist:0')],
+    ])
+
+
+def job_keyboard(job_id: int) -> InlineKeyboardMarkup:
+    return keyboard([[('Статус', f'job:{job_id}'), ('Отменить ожидание', f'canceljob:{job_id}')], [('Мои лекции', 'hist:0')]])
